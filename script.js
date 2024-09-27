@@ -3,12 +3,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const userNameInput = document.getElementById("username");
     const statsContainer = document.querySelector(".stats-container");
     const easyProgressCircle = document.querySelector(".easy-progress");
-    const mediumProgreeCircle = document.querySelector(".medium-progrss");
+    const mediumProgreeCircle = document.querySelector(".medium-progress");
     const hardProgressCircle = document.querySelector(".hard-progress");
     const easyLabel = document.getElementById("easy-label");
     const mediumLabel = document.getElementById("medium-label");
     const hardLabel = document.getElementById("hard-label");
-    const cardStatsContainer = document.querySelector(".stats-cards");
+    const cardStatsContainer = document.querySelector(".stats-card");
 
 
     function validateUsername(username) {
@@ -25,14 +25,11 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     async function fetchUserDetails(username) {
-
-
-
-
         try {
 
             searchButton.textContent = "Searching...";
             searchButton.disabled = true;
+            // statsContainer.style.setProperty("display", "none");
 
 
             const proxyUrl = 'https://cors-anywhere.herokuapp.com/'
@@ -52,8 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 redirect: "follow"
             };
 
-            const response = await fetch(proxyUrl+targetUrl, requestOptions);
-
+            const response = await fetch(proxyUrl + targetUrl, requestOptions);
 
             if (!response.ok) {
                 throw new Error("Unable to fetch the User details");
@@ -61,14 +57,57 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const data = await response.json();
             console.log("Logging data: ", data);
+
+            displayUserData(data);
         }
         catch (error) {
-            statsContainer.innerHTML = `<p>No data found</p>`
+            statsContainer.innerHTML = `<p>${error.message}</p>`
         }
         finally {
             searchButton.textContent = "Search";
             searchButton.disabled = false;
         }
+    }
+
+    function updateProgress(solved, total, label, circle){
+          const progressDegree = (solved/ total)*100;
+          circle.style.setProperty("--progress-degree", `${progressDegree}%`);
+          label.textContent = `${solved}/${total}`;
+    }
+   
+    function displayUserData(parsedData){
+        const totalQues = parsedData.data.allQuestionsCount[0].count;
+        const totalEasyQues = parsedData.data.allQuestionsCount[1].count;
+        const totalMediumQues = parsedData.data.allQuestionsCount[2].count;
+        const totalHardQues = parsedData.data.allQuestionsCount[3].count;
+
+        const solvedTotalQues = parsedData.data.matchedUser.submitStats.acSubmissionNum[0].count;
+        const solvedTotalEasyQues = parsedData.data.matchedUser.submitStats.acSubmissionNum[1].count;
+        const solvedTotalMediumQues = parsedData.data.matchedUser.submitStats.acSubmissionNum[2].count;
+        const solvedTotalHardQues = parsedData.data.matchedUser.submitStats.acSubmissionNum[3].count;
+
+
+        updateProgress( solvedTotalEasyQues, totalEasyQues,easyLabel, easyProgressCircle);
+        updateProgress( solvedTotalMediumQues, totalMediumQues, mediumLabel, mediumProgreeCircle);
+        updateProgress( solvedTotalHardQues, totalHardQues, hardLabel, hardProgressCircle);
+
+        const cardData = [
+            {label: "Overall Submissions", value: parsedData.data.matchedUser.submitStats.totalSubmissionNum[0].submissions},
+            {label: "Overall Easy Submissions", value: parsedData.data.matchedUser.submitStats.totalSubmissionNum[1].submissions},
+            {label: "Overall Medium Submissions", value: parsedData.data.matchedUser.submitStats.totalSubmissionNum[2].submissions},
+            {label: "Overall Hard Submissions", value: parsedData.data.matchedUser.submitStats.totalSubmissionNum[3].submissions}
+        ];
+
+        cardStatsContainer.innerHTML = cardData.map(
+            data => {
+                return `
+                <div class= "card">
+                <h4>${data.label}</h4>
+                <p>${data.value}</p>
+                </div>
+                `
+            }
+        ).join("")
     }
     searchButton.addEventListener('click', function () {
         const username = userNameInput.value;

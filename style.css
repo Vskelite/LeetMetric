@@ -68,9 +68,32 @@ h1{
     color: white;
     font-weight: 700;
     background: conic-gradient(#299f5d var(--progress-degree, 0%), #283a2e 0%);
+    flex-direction: column;
 }
 
 .circle span{
     position: relative;
     z-index: 2;
+}
+
+.stats-card{
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    justify-content: space-evenly;
+}
+
+h4{
+    font-size: 1rem;
+}
+.card{
+    background-color: rgb(248, 161, 54);
+    width: 12rem;
+    max-width: 17rem;
+    padding: 0.8rem;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    min-height: 4.5rem;
 }
